@@ -50,11 +50,10 @@ int main(void) {
     ConsoleInit();
 
 
-
-    ConsolePrint("Hello World!\n\r");
-
    while(1) {
 	   int i;
+
+	   ConsolePrint("Hello CC3200 World!\n\r");
 	   GPIOPinWrite(GPIOA0_BASE, 0x01, 1);
 	   for(i=0; i < 10000000; i++);
 	   GPIOPinWrite(GPIOA0_BASE, 0x01, 0);

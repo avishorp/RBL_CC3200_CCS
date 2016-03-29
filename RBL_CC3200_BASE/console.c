@@ -22,6 +22,8 @@ int g_iConsoleWritePtr;
 int g_iConsoleReadPtr;
 int g_iConsoleLength;
 
+void xx() { MAP_UARTIntClear(CONSOLE, UART_INT_TX); ConsoleProcessTX(); }
+
 // Initialize the console
 void ConsoleInit()
 {
@@ -30,6 +32,10 @@ void ConsoleInit()
 			MAP_PRCMPeripheralClockGet(CONSOLE_PERIPH),
 	        CONSOLE_BAUD_RATE,
 			(UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
+
+	// Configure the interrupt to fire on end-of-transimission
+	MAP_UARTTxIntModeSet(CONSOLE, UART_TXINT_MODE_EOT);
+	MAP_UARTIntRegister(CONSOLE, xx);//ConsoleProcessTX);
 
 	// Clear the console buffer
 	memset(g_cConsoleBuffer, 0, sizeof(g_cConsoleBuffer));
@@ -46,6 +52,9 @@ void ConsolePrint(const char* pStr)
 {
 	const char* p = pStr;
 
+	// Disable interrupts while wer'e working with the buffer
+	MAP_UARTIntDisable(CONSOLE, UART_INT_TX);
+
 	// Copy the message
 	while ((*p != 0) && (g_iConsoleLength < CONSOLE_BUFFER_SIZE)) {
 		g_cConsoleBuffer[g_iConsoleWritePtr] = *p;
@@ -56,6 +65,10 @@ void ConsolePrint(const char* pStr)
 
 	// Kick the sending process (if not already in progress)
 	ConsoleProcessTX();
+
+	// Enable interrupt
+	MAP_UARTIntEnable(CONSOLE, UART_INT_TX);
+
 }
 
 void ConsoleProcessTX()
