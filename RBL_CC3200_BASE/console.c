@@ -23,7 +23,7 @@ int g_iConsoleReadPtr;
 int g_iConsoleLength;
 
 // Local forwards
-void _ConsoleProcessTx();
+void _ConsoleProcessTX();
 void _TxIntHandler();
 
 // Initialize the console
@@ -64,6 +64,14 @@ void ConsolePrint(const char* pStr)
 		g_iConsoleWritePtr = (g_iConsoleWritePtr + 1) % CONSOLE_BUFFER_SIZE;
 		g_iConsoleLength++;
 	}
+
+#ifdef CONSOLE_TRUNCATE_SYM
+	// Add truncation symbol
+	if (*p != 0) {
+		// Truncation has occured
+		g_cConsoleBuffer[(CONSOLE_BUFFER_SIZE - g_iConsoleWritePtr - 1) % CONSOLE_BUFFER_SIZE] = CONSOLE_TRUNCATE_SYM;
+	}
+#endif
 
 	// Kick the sending process (if not already in progress)
 	_ConsoleProcessTX();
