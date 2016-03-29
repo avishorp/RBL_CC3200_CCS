@@ -22,7 +22,9 @@ int g_iConsoleWritePtr;
 int g_iConsoleReadPtr;
 int g_iConsoleLength;
 
-void xx() { MAP_UARTIntClear(CONSOLE, UART_INT_TX); ConsoleProcessTX(); }
+// Local forwards
+void _ConsoleProcessTx();
+void _TxIntHandler();
 
 // Initialize the console
 void ConsoleInit()
@@ -35,7 +37,7 @@ void ConsoleInit()
 
 	// Configure the interrupt to fire on end-of-transimission
 	MAP_UARTTxIntModeSet(CONSOLE, UART_TXINT_MODE_EOT);
-	MAP_UARTIntRegister(CONSOLE, xx);//ConsoleProcessTX);
+	MAP_UARTIntRegister(CONSOLE, _TxIntHandler);
 
 	// Clear the console buffer
 	memset(g_cConsoleBuffer, 0, sizeof(g_cConsoleBuffer));
@@ -64,14 +66,14 @@ void ConsolePrint(const char* pStr)
 	}
 
 	// Kick the sending process (if not already in progress)
-	ConsoleProcessTX();
+	_ConsoleProcessTX();
 
 	// Enable interrupt
 	MAP_UARTIntEnable(CONSOLE, UART_INT_TX);
 
 }
 
-void ConsoleProcessTX()
+void _ConsoleProcessTX()
 {
 	while(g_iConsoleLength > 0) {
 		// There are characters to send
@@ -89,3 +91,8 @@ void ConsoleProcessTX()
 }
 
 
+void _TxIntHandler()
+{
+	MAP_UARTIntClear(CONSOLE, UART_INT_TX);
+	_ConsoleProcessTX();
+}

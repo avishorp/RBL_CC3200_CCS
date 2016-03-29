@@ -25,6 +25,15 @@
 
 extern void (* const g_pfnVectors[])(void);
 
+#ifdef STRESS
+#define MESSAGE "Thie is a very very very very very very very very very very very very very very very very very " \
+		 	    "very very very very very very very very very very very very very very very very very very very " \
+		 	    "very very very very very very very very very very very very very very very very very very very " \
+				"long message"
+#else
+#define MESSAGE "Hello CC3200 world!\n\r"
+#endif
+
 static void BoardInit(void)
 {
 	// Initialize interrupt table (see startup_ccs.c)
@@ -38,8 +47,6 @@ static void BoardInit(void)
 }
 
 int main(void) {
-    long lRetVal = -1;
-
     // Board Initialization
     BoardInit();
 
@@ -53,7 +60,7 @@ int main(void) {
    while(1) {
 	   int i;
 
-	   ConsolePrint("Hello CC3200 World!\n\r");
+	   ConsolePrint(MESSAGE);
 	   GPIOPinWrite(GPIOA0_BASE, 0x01, 1);
 	   for(i=0; i < 10000000; i++);
 	   GPIOPinWrite(GPIOA0_BASE, 0x01, 0);
